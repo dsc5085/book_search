@@ -1,2 +1,2 @@
 # book_search
-Book Search App using Docker and Elasticsearch
+Example Book Search App using Docker and Elasticsearch
