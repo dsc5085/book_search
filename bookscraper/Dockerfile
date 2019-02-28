@@ -3,6 +3,10 @@ FROM python:3.6
 # Install Cron
 RUN apt-get update && apt-get -y install cron
 
+# Run requirements
+COPY requirements.txt /
+RUN pip install -r /requirements.txt
+
 # Create directory
 ADD . /dir
 WORKDIR /dir
