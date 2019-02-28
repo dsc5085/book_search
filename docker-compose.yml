@@ -13,10 +13,14 @@ services:
       - PORT=3000
     volumes:
       - ./books:/usr/src/app/books
+    networks:
+      - services
 
   bookscraper:
     container_name: gs-bookscraper
     build: ./bookscraper
+    networks:
+      - services
 
   frontend:
     container_name: gs_frontend
@@ -38,6 +42,12 @@ services:
     ports:
       - "9300:9300"
       - "9200:9200"
+    networks:
+      - services
+
+networks:
+  services:
+    driver: bridge
 
 volumes:
   esdata:
