@@ -1,8 +1,10 @@
 const Koa = require('koa')
+const bodyParser = require('koa-bodyparser');
 const Router = require('koa-router')
 const joi = require('joi')
 const validate = require('koa-joi-validate')
 const search = require('./search')
+const load_data = require('./load_data')
 
 const app = new Koa()
 const router = new Router()
@@ -50,12 +52,25 @@ router.get('/paragraphs',
   }
 )
 
+router.post('/book',
+    validate({
+        body: {
+            content: joi.string().required()
+        }
+    }),
+    async (ctx, next) => {
+        const { content } = ctx.request.body
+        ctx.body = await load_data.parseAndInsertBook(content)
+    }
+)
+
 const port = process.env.PORT || 3000
 
 app
-  .use(router.routes())
-  .use(router.allowedMethods())
-  .listen(port, err => {
+    .use(bodyParser())
+    .use(router.routes())
+    .use(router.allowedMethods())
+    .listen(port, err => {
     if (err) throw err
     console.log(`App Listening on Port ${port}`)
-  })
+    })

@@ -12,8 +12,8 @@ async function readAndInsertBooks() {
     for (let file of files) {
       console.log(`Reading File - ${file}`)
       const filePath = path.join('./books', file)
-      const { title, author, paragraphs } = parseBookFile(filePath)
-      await insertBookData(title, author, paragraphs)
+      const book = fs.readFileSync(filePath, 'utf8')
+      await parseAndInsertBook(book);
     }
   } catch (err) {
     console.error(err)
@@ -22,9 +22,13 @@ async function readAndInsertBooks() {
 
 readAndInsertBooks()
 
-function parseBookFile (filePath) {
-  const book = fs.readFileSync(filePath, 'utf8')
+async function parseAndInsertBook(book) {
+  const {title, author, paragraphs} = parseBookFile(book)
+  await insertBookData(title, author, paragraphs)
+}
 
+function parseBookFile (book) {
+  console.log(book)
   const title = book.match(/^Title:\s(.+)$/m)[1]
   const authorMatch = book.match(/^Author:\s(.+)$/m)
   const author = (!authorMatch || authorMatch[1].trim() === '') ? 'Unknown Author' : authorMatch[1]
@@ -68,4 +72,8 @@ async function insertBookData(title, author, paragraphs) {
 
   await esConnection.client.bulk({ body: bulkOps })
   console.log(`Indexed Paragraphs ${paragraphs.length - (bulkOps.length / 2)} - ${paragraphs.length}\n\n\n`)
+}
+
+module.exports = {
+  parseAndInsertBook
 }
