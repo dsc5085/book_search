@@ -67,7 +67,7 @@ router.post('/book',
 const port = process.env.PORT || 3000
 
 app
-    .use(bodyParser())
+    .use(bodyParser({formLimit: '5mb'}))
     .use(router.routes())
     .use(router.allowedMethods())
     .listen(port, err => {

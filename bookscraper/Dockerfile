@@ -5,12 +5,12 @@ RUN apt-get update && apt-get -y install cron
 
 # Run requirements
 COPY requirements.txt /
-RUN pip install -r /requirements.txt
+RUN pip3 install -r /requirements.txt
 
 # Create directory
-ADD . /dir
-WORKDIR /dir
-RUN chmod 0644 /dir
+ADD . /bookscraper
+WORKDIR /bookscraper
+RUN chmod 0644 /bookscraper
 
 # Run cron
 ADD crontab /etc/cron.d/bookscraper-cron
