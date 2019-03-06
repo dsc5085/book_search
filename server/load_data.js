@@ -1,10 +1,15 @@
 const fs = require('fs')
 const path = require('path')
-const esConnection = require('./connection')
+const { client } = require('./es')
+const indexes = require('./indexes')
+const types = require('./types')
+
+let index = indexes.LIBRARY
+let type = types.NOVEL
 
 async function readAndInsertBooks() {
   try {
-    await esConnection.resetIndex()
+    await resetIndex()
 
     let files = fs.readdirSync('./books').filter(file => file.slice(-4) === '.txt')
     console.log(`Found ${files.length} Files`)
@@ -21,6 +26,26 @@ async function readAndInsertBooks() {
 }
 
 readAndInsertBooks()
+
+async function resetIndex() {
+  if (await client.indices.exists({ index })) {
+    await client.indices.delete({ index })
+  }
+
+  await client.indices.create({ index })
+  await putBookMapping()
+}
+
+async function putBookMapping() {
+  const schema = {
+    title: { type: 'keyword' },
+    author: { type: 'keyword' },
+    location: { type: 'integer' },
+    text: { type: 'text' }
+  }
+
+  return client.indices.putMapping({ index, type, body: { properties: schema } })
+}
 
 async function parseAndInsertBook(book) {
   const {title, author, paragraphs} = parseBookFile(book)
@@ -54,7 +79,7 @@ async function insertBookData(title, author, paragraphs) {
   let bulkOps = []
 
   for (let i = 0; i < paragraphs.length; i++) {
-    bulkOps.push({ index: { _index: esConnection.index, _type: esConnection.type } })
+    bulkOps.push({ index: { _index: index, _type: type } })
 
     bulkOps.push({
       author,
@@ -64,13 +89,13 @@ async function insertBookData(title, author, paragraphs) {
     })
 
     if (i > 0 && i % 500 === 0) {
-      await esConnection.client.bulk({ body: bulkOps })
+      await client.bulk({ body: bulkOps })
       bulkOps = []
       console.log(`Indexed Paragraphs ${i - 499} - ${i}`)
     }
   }
 
-  await esConnection.client.bulk({ body: bulkOps })
+  await client.bulk({ body: bulkOps })
   console.log(`Indexed Paragraphs ${paragraphs.length - (bulkOps.length / 2)} - ${paragraphs.length}\n\n\n`)
 }
 

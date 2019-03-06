@@ -1,4 +1,9 @@
-const { client, index, type } = require('./connection')
+const { client } = require('./es')
+const indexes = require('./indexes')
+const types = require('./types')
+
+let index = indexes.LIBRARY
+let type = types.NOVEL
 
 module.exports = {
   queryTerm (term, offset = 0) {
