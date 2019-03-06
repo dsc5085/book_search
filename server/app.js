@@ -3,8 +3,9 @@ const bodyParser = require('koa-bodyparser');
 const Router = require('koa-router')
 const joi = require('joi')
 const validate = require('koa-joi-validate')
-const search = require('./search')
-const load_data = require('./load_data')
+const search = require('./books/search')
+const load_data = require('./books/load_data')
+const notif_api = require('./notifications/api')
 
 const app = new Koa()
 const router = new Router()
@@ -61,6 +62,18 @@ router.post('/book',
     async (ctx, next) => {
         const { content } = ctx.request.body
         ctx.body = await load_data.parseAndInsertBook(content)
+    }
+)
+
+router.post('/notifier',
+    validate({
+        query: {
+            term: joi.string().max(60).required()
+        }
+    }),
+    async (ctx, next) => {
+        const { term } = ctx.request.query
+        ctx.body = await notif_api.createNotifier(term)
     }
 )
 

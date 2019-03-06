@@ -1,6 +1,6 @@
-const { client } = require('./es')
-const indexes = require('./indexes')
-const types = require('./types')
+const { client } = require('../es/connection')
+const indexes = require('../es/indexes')
+const types = require('../es/types')
 
 let index = indexes.LIBRARY
 let type = types.NOVEL
